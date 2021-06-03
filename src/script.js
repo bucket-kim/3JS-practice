@@ -1,5 +1,6 @@
 import "./style.css";
 import * as THREE from "three";
+import gsap from "gsap";
 
 // Canvas
 const canvas = document.querySelector("canvas.webgl");
@@ -69,16 +70,22 @@ renderer.render(scene, camera);
 const clock = new THREE.Clock();
 
 // animation
+
+// gsap animation
+gsap.to(group.position, { duration: 1, x: 2, ease: "bounce" });
+gsap.to(group.position, { duration: 1, delay: 1, x: 0, ease: "bounce" });
+
+// manual animation
 const tick = () => {
-  const elapseTime = clock.getElapsedTime();
+  //   const elapseTime = clock.getElapsedTime();
 
-  // group.rotation.y += 0.01;
-  // group.rotation.y = elapseTime;
-  camera.position.y = Math.sin(elapseTime);
-  camera.position.x = Math.cos(elapseTime);
-  camera.lookAt(group.position);
+  //   // group.rotation.y += 0.01;
+  //   // group.rotation.y = elapseTime;
+  //   camera.position.y = Math.sin(elapseTime);
+  //   camera.position.x = Math.cos(elapseTime);
+  //   camera.lookAt(group.position);
 
-  // rendering
+  //   // rendering
   renderer.render(scene, camera);
   window.requestAnimationFrame(tick);
 };
