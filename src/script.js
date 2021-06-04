@@ -1,6 +1,22 @@
 import "./style.css";
 import * as THREE from "three";
 import gsap from "gsap";
+import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
+
+const sizes = {
+  width: window.innerWidth,
+  height: window.innerHeight,
+};
+
+// cursor
+const cursor = {
+  x: 0,
+  y: 0,
+};
+window.addEventListener("mousemove", (e) => {
+  cursor.x = e.clientX / sizes.width - 0.5;
+  cursor.y = e.clientY / sizes.height - 0.5;
+});
 
 // Canvas
 const canvas = document.querySelector("canvas.webgl");
@@ -26,35 +42,34 @@ const cube2 = new THREE.Mesh(
   new THREE.BoxGeometry(1, 1, 1),
   new THREE.MeshBasicMaterial({ color: 0x00ff00 })
 );
-cube2.position.x = -2;
+cube2.position.x = -1.5;
 group.add(cube2);
 
 const cube3 = new THREE.Mesh(
   new THREE.BoxGeometry(1, 1, 1),
   new THREE.MeshBasicMaterial({ color: 0x0000ff })
 );
-cube3.position.x = 2;
+cube3.position.x = 1.5;
 group.add(cube3);
 
 // rotation
 
 const axesHelper = new THREE.AxesHelper(0.5);
-scene.add(axesHelper);
+// scene.add(axesHelper);
 /**
  * Sizes
  */
-const sizes = {
-  width: window.innerWidth,
-  height: window.innerHeight,
-};
 
 /**
  * Camera
  */
 const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height);
-camera.position.z = 3;
-camera.position.y = 0.5;
+camera.position.z = 2.5;
+// camera.position.y = 0.5;
 scene.add(camera);
+
+const controls = new OrbitControls(camera, canvas);
+controls.enableDamping = true;
 
 // camera.lookAt(group.position);
 /**
@@ -72,8 +87,8 @@ const clock = new THREE.Clock();
 // animation
 
 // gsap animation
-gsap.to(group.position, { duration: 1, x: 2, ease: "bounce" });
-gsap.to(group.position, { duration: 1, delay: 1, x: 0, ease: "bounce" });
+// gsap.to(group.position, { duration: 1, x: 2, ease: "bounce" });
+// gsap.to(group.position, { duration: 1, delay: 1, x: 0, ease: "bounce" });
 
 // manual animation
 const tick = () => {
@@ -84,6 +99,21 @@ const tick = () => {
   //   camera.position.y = Math.sin(elapseTime);
   //   camera.position.x = Math.cos(elapseTime);
   //   camera.lookAt(group.position);
+
+  // camera animation update
+
+  // v1
+  // camera.position.x = cursor.x * -1;
+  // camera.position.y = cursor.y * 1;
+
+  // v2
+  // camera.position.x = Math.sin(cursor.x * Math.PI * 2) * 2;
+  // camera.position.z = Math.cos(cursor.x * Math.PI * 2) * 2;
+  // camera.position.y = cursor.y * 5;
+  // camera.lookAt(group.position);
+
+  // update controls
+  controls.update();
 
   //   // rendering
   renderer.render(scene, camera);
