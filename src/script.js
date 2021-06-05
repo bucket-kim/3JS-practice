@@ -2,6 +2,7 @@ import "./style.css";
 import * as THREE from "three";
 import gsap from "gsap";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
+import * as dat from "dat.gui";
 
 const sizes = {
   width: window.innerWidth,
@@ -24,9 +25,16 @@ const canvas = document.querySelector("canvas.webgl");
 // Scene
 const scene = new THREE.Scene();
 
+// Dat GUI
+const gui = new dat.GUI();
+
 /**
  * Objects
  */
+const geometry = new THREE.BoxGeometry(0.5, 0.5, 0.5);
+const material = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+const mesh = new THREE.Mesh(geometry, material);
+scene.add(mesh);
 
 const group = new THREE.Group();
 group.scale.set(0.5, 0.5, 0.5);
@@ -34,23 +42,49 @@ scene.add(group);
 
 const cube1 = new THREE.Mesh(
   new THREE.BoxGeometry(1, 1, 1),
-  new THREE.MeshBasicMaterial({ color: 0xff0000 })
+  new THREE.MeshBasicMaterial({
+    color: 0xff0000,
+    wireframe: false,
+  })
 );
-group.add(cube1);
+// group.add(cube1);
 
 const cube2 = new THREE.Mesh(
   new THREE.BoxGeometry(1, 1, 1),
-  new THREE.MeshBasicMaterial({ color: 0x00ff00 })
+  new THREE.MeshBasicMaterial({
+    color: 0x00ff00,
+    wireframe: false,
+  })
 );
 cube2.position.x = -1.5;
-group.add(cube2);
+// group.add(cube2);
 
 const cube3 = new THREE.Mesh(
-  new THREE.BoxGeometry(1, 1, 1),
-  new THREE.MeshBasicMaterial({ color: 0x0000ff })
+  new THREE.BoxGeometry(1, 1, 1, 2, 2, 2),
+  new THREE.MeshBasicMaterial({
+    color: 0x0000ff,
+    wireframe: false,
+  })
 );
 cube3.position.x = 1.5;
-group.add(cube3);
+// group.add(cube3);
+
+const parameters = {
+  color: 0xff0000,
+  spin: () => {
+    gsap.to(mesh.rotation, { duration: 1, y: mesh.rotation.y + Math.PI * 2 });
+  },
+};
+
+// scene.add(group, material);
+
+// gui add features
+gui.add(mesh.position, "y").min(-3).max(3).step(0.01).name("elevation");
+gui.add(mesh, "visible");
+gui.addColor(parameters, "color").onChange(() => {
+  material.color.set(parameters.color);
+});
+gui.add(parameters, "spin");
 
 // rotation
 
@@ -134,23 +168,25 @@ window.addEventListener("resize", () => {
 renderer.setSize(sizes.width, sizes.height);
 renderer.render(scene, camera);
 
-window.addEventListener("dblclick", () => {
-  const fullscreenElement =
-    document.fullscreenElement || document.webkitFullscreenElement;
+// double click action
 
-  if (!document.fullscreenElement) {
-    if (canvas.requestFullscreen) {
-      canvas.requestFullscreen();
-    } else if (canvas.webkitRequestFullscreen) {
-      canvas.webkitRequestFullscreen();
-    }
-  } else {
-    if (document.exitFullscreen) {
-      document.exitFullscreen();
-    } else if (document.webkitExitFullscreen) {
-      document.webkitExitFullscreen();
-    }
-  }
-});
+// window.addEventListener("dblclick", () => {
+//   const fullscreenElement =
+//     document.fullscreenElement || document.webkitFullscreenElement;
+
+//   if (!document.fullscreenElement) {
+//     if (canvas.requestFullscreen) {
+//       canvas.requestFullscreen();
+//     } else if (canvas.webkitRequestFullscreen) {
+//       canvas.webkitRequestFullscreen();
+//     }
+//   } else {
+//     if (document.exitFullscreen) {
+//       document.exitFullscreen();
+//     } else if (document.webkitExitFullscreen) {
+//       document.webkitExitFullscreen();
+//     }
+//   }
+// });
 
 tick();
