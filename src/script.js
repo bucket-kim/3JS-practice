@@ -4,6 +4,39 @@ import gsap from "gsap";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import * as dat from "dat.gui";
 
+// texture from image
+// const image = new Image();
+// image.src = "/img/color.jpg";
+// const texture = new THREE.Texture(image);
+// image.onload = () => {
+//   texture.needsUpdate = true;
+// };
+
+const loadingManager = new THREE.LoadingManager();
+loadingManager.onStart = () => {
+  console.log("Starting");
+};
+loadingManager.onLoad = () => {
+  console.log("Loading");
+};
+loadingManager.onProgress = () => {
+  console.log("Progressing");
+};
+loadingManager.onError = () => {
+  console.log("Failed");
+};
+
+const textureLoader = new THREE.TextureLoader(loadingManager);
+
+const colorTexture = textureLoader.load("/img/color.jpg");
+const AOTexture = textureLoader.load("/img/ambientOcclusion.jpg");
+const alphaTexture = textureLoader.load("/img/alpha.jpg");
+const heightTexture = textureLoader.load("/img/height.png");
+const metalnessTexture = textureLoader.load("/img/metalness.jpg");
+const roughnessTexture = textureLoader.load("/img/roughness.jpg");
+const normalTexture = textureLoader.load("/img/normal.jpg");
+
+// size control
 const sizes = {
   width: window.innerWidth,
   height: window.innerHeight,
@@ -26,13 +59,13 @@ const canvas = document.querySelector("canvas.webgl");
 const scene = new THREE.Scene();
 
 // Dat GUI
-const gui = new dat.GUI();
+const gui = new dat.GUI({ closed: true, width: 400 });
 
 /**
  * Objects
  */
 const geometry = new THREE.BoxGeometry(0.5, 0.5, 0.5);
-const material = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+const material = new THREE.MeshBasicMaterial({ map: colorTexture });
 const mesh = new THREE.Mesh(geometry, material);
 scene.add(mesh);
 
@@ -81,6 +114,7 @@ const parameters = {
 // gui add features
 gui.add(mesh.position, "y").min(-3).max(3).step(0.01).name("elevation");
 gui.add(mesh, "visible");
+gui.add(material, "wireframe");
 gui.addColor(parameters, "color").onChange(() => {
   material.color.set(parameters.color);
 });
