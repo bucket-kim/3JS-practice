@@ -4,6 +4,9 @@ import gsap from "gsap";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import * as dat from "dat.gui";
 
+// Scene
+const scene = new THREE.Scene();
+
 // texture from image
 // const image = new Image();
 // image.src = "/img/color.jpg";
@@ -25,6 +28,15 @@ loadingManager.onProgress = () => {
 loadingManager.onError = () => {
   console.log("Failed");
 };
+const cubeTextureLoader = new THREE.CubeTextureLoader();
+const environtmentTexture = cubeTextureLoader.load([
+  "/environmentMaps/1/nx.jpg",
+  "/environmentMaps/1/ny.jpg",
+  "/environmentMaps/1/nz.jpg",
+  "/environmentMaps/1/px.jpg",
+  "/environmentMaps/1/py.jpg",
+  "/environmentMaps/1/pz.jpg",
+]);
 
 const textureLoader = new THREE.TextureLoader(loadingManager);
 
@@ -35,6 +47,17 @@ const heightTexture = textureLoader.load("/img/height.png");
 const metalnessTexture = textureLoader.load("/img/metalness.jpg");
 const roughnessTexture = textureLoader.load("/img/roughness.jpg");
 const normalTexture = textureLoader.load("/img/normal.jpg");
+
+// lighting
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+scene.add(ambientLight);
+
+const pointLight = new THREE.PointLight(0xffffff, 0.5);
+pointLight.position.x = 2;
+pointLight.position.y = 3;
+pointLight.position.z = 4;
+
+// scene.add(pointLight);
 
 // size control
 const sizes = {
@@ -55,17 +78,35 @@ window.addEventListener("mousemove", (e) => {
 // Canvas
 const canvas = document.querySelector("canvas.webgl");
 
-// Scene
-const scene = new THREE.Scene();
-
 // Dat GUI
 const gui = new dat.GUI({ closed: true, width: 400 });
 
 /**
  * Objects
  */
-const geometry = new THREE.BoxGeometry(0.5, 0.5, 0.5);
-const material = new THREE.MeshBasicMaterial({ map: colorTexture });
+const geometry = new THREE.BoxGeometry(1, 1, 1, 10, 10, 10);
+const material = new THREE.MeshStandardMaterial();
+
+geometry.setAttribute(
+  "uv2",
+  new THREE.BufferAttribute(geometry.attributes.uv.array, 2)
+);
+// mapping
+material.map = colorTexture;
+material.aoMap = AOTexture;
+material.aoMapIntensity = 1;
+material.displacementMap = heightTexture;
+material.displacementScale = 0.05;
+material.metalnessMap = metalnessTexture;
+material.roughnessMap = roughnessTexture;
+material.normalMap = normalTexture;
+material.normalScale.set(0.5, 0.5);
+material.transparent = true;
+material.alphaMap = alphaTexture;
+
+// HDRI map
+material.envMap = environtmentTexture;
+
 const mesh = new THREE.Mesh(geometry, material);
 scene.add(mesh);
 
@@ -119,6 +160,8 @@ gui.addColor(parameters, "color").onChange(() => {
   material.color.set(parameters.color);
 });
 gui.add(parameters, "spin");
+gui.add(material, "metalness").min(0).max(1).step(0.0001);
+gui.add(material, "roughness").min(0).max(1).step(0.0001);
 
 // rotation
 
@@ -133,7 +176,7 @@ const axesHelper = new THREE.AxesHelper(0.5);
  */
 const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height);
 camera.position.z = 2.5;
-// camera.position.y = 0.5;
+camera.position.y = 1;
 scene.add(camera);
 
 const controls = new OrbitControls(camera, canvas);
