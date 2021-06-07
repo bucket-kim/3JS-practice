@@ -29,6 +29,7 @@ loadingManager.onError = () => {
   console.log("Failed");
 };
 const cubeTextureLoader = new THREE.CubeTextureLoader();
+
 const environtmentTexture = cubeTextureLoader.load([
   "/environmentMaps/1/nx.jpg",
   "/environmentMaps/1/ny.jpg",
@@ -48,9 +49,11 @@ const metalnessTexture = textureLoader.load("/img/metalness.jpg");
 const roughnessTexture = textureLoader.load("/img/roughness.jpg");
 const normalTexture = textureLoader.load("/img/normal.jpg");
 
+const matCapTexture = textureLoader.load("/matcaps/7.png");
+
 // lighting
-const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
-scene.add(ambientLight);
+const ambientLight = new THREE.AmbientLight(0xffffff, 1);
+// scene.add(ambientLight);
 
 const pointLight = new THREE.PointLight(0xffffff, 0.5);
 pointLight.position.x = 2;
@@ -58,6 +61,50 @@ pointLight.position.y = 3;
 pointLight.position.z = 4;
 
 // scene.add(pointLight);
+
+// creating fonts
+const fontLoader = new THREE.FontLoader();
+
+fontLoader.load("/fonts/helvetiker_regular.typeface.json", (font) => {
+  console.log("loaded");
+  const textGeometry = new THREE.TextBufferGeometry("Hello!\n Welcome!", {
+    font,
+    size: 0.5,
+    height: 0.2,
+    curveSegments: 5,
+    bevelEnabled: true,
+    bevelThickness: 0.03,
+    bevelSize: 0.02,
+    bevelOffset: 0,
+    bevelSegments: 3,
+  });
+  textGeometry.computeBoundingBox();
+  // textGeometry.translate(
+  //   -textGeometry.boundingBox.max.x * 0.5,
+  //   -textGeometry.boundingBox.max.y * 0.5,
+  //   -textGeometry.boundingBox.max.z * 0.5
+  // );
+  textGeometry.center();
+
+  const material = new THREE.MeshMatcapMaterial({ matcap: matCapTexture });
+  const text = new THREE.Mesh(textGeometry, material);
+  scene.add(text);
+
+  const donutGeometry = new THREE.TorusGeometry(0.2, 0.1, 20, 45);
+  for (let i = 0; i < 100; i++) {
+    const donut = new THREE.Mesh(donutGeometry, material);
+    donut.position.x = (Math.random() - 0.5) * 10;
+    donut.position.y = (Math.random() - 0.5) * 10;
+    donut.position.z = (Math.random() - 0.5) * 10;
+    donut.rotation.x = Math.random() * Math.PI;
+    donut.rotation.y = Math.random() * Math.PI;
+
+    const scale = Math.random();
+    donut.scale.set(scale, scale, scale);
+
+    scene.add(donut);
+  }
+});
 
 // size control
 const sizes = {
@@ -108,7 +155,7 @@ material.alphaMap = alphaTexture;
 material.envMap = environtmentTexture;
 
 const mesh = new THREE.Mesh(geometry, material);
-scene.add(mesh);
+// scene.add(mesh);
 
 const group = new THREE.Group();
 group.scale.set(0.5, 0.5, 0.5);
